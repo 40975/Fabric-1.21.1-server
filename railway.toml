@@ -1,0 +1,7 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "java -Xmx2G -Xms1G -jar fabric-server-launch.jar nogui"
+restartPolicyType = "always"
