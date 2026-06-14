@@ -17,7 +17,7 @@ RUN echo "eula=true" > eula.txt
 
 # Создаём server.properties
 RUN echo "server-port=25565\n\
-online-mode=true\n\
+online-mode=false\n\
 max-players=20\n\
 view-distance=10\n\
 simulation-distance=10\n\
