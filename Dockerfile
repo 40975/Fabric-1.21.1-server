@@ -7,7 +7,7 @@ WORKDIR /minecraft
 RUN apk add --no-cache curl bash
 
 # Скачиваем Fabric installer
-RUN curl -OJ https://meta.fabricmc.net/v2/versions/loader/1.21.1/0.16.14/1.0.1/server/jar
+RUN curl -OJ https://meta.fabricmc.net/v2/versions/loader/1.21.11/0.16.14/1.0.1/server/jar
 
 # Переименовываем для удобства
 RUN mv fabric-server-mc.*.jar fabric-server-launch.jar
