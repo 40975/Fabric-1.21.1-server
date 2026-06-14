@@ -1,31 +1,54 @@
-FROM eclipse-temurin:21-jre-alpine
+#!/bin/bash
 
-WORKDIR /minecraft
+SERVER_PORT=${PORT:-25565}
 
-# Утилиты
-RUN apk add --no-cache curl bash
+echo "============================================"
+echo "  Minecraft Fabric 1.21.1"
+echo "  Port: ${SERVER_PORT}"
+echo "  World data: /minecraft"
+echo "============================================"
 
-# Скачиваем Fabric installer
-ARG FABRIC_INSTALLER_VERSION=1.0.1
+# Переходим в папку данных (Volume)
+cd /minecraft
 
-RUN curl -OJ "https://meta.fabricmc.net/v2/versions/loader/1.21.1/0.16.14/1.0.1/server/jar" \
-    && mv *.jar fabric-server-launch.jar
+# Копируем файлы запуска если их нет (первый запуск)
+if [ ! -f "fabric-server-launch.jar" ]; then
+    echo "Первый запуск — копируем файлы сервера..."
+    cp /app/fabric-server-launch.jar /minecraft/
+    cp /app/eula.txt /minecraft/
+fi
 
-# Если не скачалось по API, используем прямую ссылку:
-# RUN curl -L -o fabric-server-launch.jar \
-#     "https://meta.fabricmc.net/v2/versions/loader/1.21.1/0.16.14/1.0.1/server/jar"
+# Создаём server.properties (всегда свежий, чтобы порт обновлялся)
+cat > server.properties <<EOF
+server-port=${SERVER_PORT}
+query.port=${SERVER_PORT}
+gamemode=survival
+difficulty=normal
+max-players=10
+motd=Fabric Railway Server
+level-name=world
+online-mode=false
+enable-query=false
+view-distance=8
+simulation-distance=6
+spawn-protection=0
+pvp=true
+allow-nether=true
+enable-command-block=true
+network-compression-threshold=256
+rate-limit=0
+white-list=false
+enforce-secure-profile=false
+prevent-proxy-connections=false
+server-ip=
+EOF
 
-# Принимаем EULA
-RUN echo "eula=true" > eula.txt
+echo "Запуск сервера..."
 
-# Копируем файлы
-COPY server.properties server.properties
-COPY start.sh start.sh
-RUN chmod +x start.sh
-
-# Первый запуск — чтобы Fabric скачал ванильный сервер и сгенерировал файлы
-RUN timeout 60 java -Xmx512M -jar fabric-server-launch.jar --nogui || true
-
-EXPOSE 25565
-
-CMD ["./start.sh"]
+exec java \
+    -Xms512M \
+    -Xmx1024M \
+    -XX:+UseG1GC \
+    -jar fabric-server-launch.jar \
+    --nogui \
+    --port ${SERVER_PORT}
